@@ -1,7 +1,7 @@
 {
-  "name": "Money Nest ── 毎日のお小遣い管理をもっと簡単に",
+  "name": "Money Nest",
   "short_name": "Money Nest",
-  "description": "3秒で記録できる、シンプルなお小遣い・貯金管理アプリ",
+  "description": "毎日のお小遣い管理をもっと簡単に。お小遣い・支出・貯金目標をシンプルに管理できるWebアプリです。",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,7 +10,23 @@
   "theme_color": "#0A84FF",
   "lang": "ja",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
