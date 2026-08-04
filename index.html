@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>おこづかい貯金 | Pocket</title>
-<meta name="description" content="3秒で記録できる、シンプルなお小遣い・貯金管理アプリ">
+<title>Money Nest | 毎日のお小遣い管理をもっと簡単に</title>
+<meta name="description" content="毎日のお小遣い管理をもっと簡単に。お小遣い・支出・貯金目標をシンプルに管理できるWebアプリです。">
 <meta name="theme-color" content="#0A84FF">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-512.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
 
 <style>
 /* ============================================================
-   Pocket ── おこづかい・貯金管理アプリ
+   Money Nest ── お小遣い・貯金管理アプリ
    デザイン方針: Apple風 / ガラスモーフィズム / 白基調 + ブルーアクセント
    ============================================================ */
 
@@ -116,9 +116,10 @@ button{ font-family:inherit; }
 .brand{ display:flex; align-items:center; gap:9px; }
 .brand-mark{
   width:34px; height:34px; border-radius:11px;
-  background:linear-gradient(150deg, var(--accent), #6BC7FF);
+  background:linear-gradient(150deg, var(--accent), #6BC7FF) url('icon-192.png') center/78% no-repeat;
   display:flex; align-items:center; justify-content:center;
-  font-size:17px; box-shadow:0 6px 16px -4px rgba(10,132,255,.55);
+  box-shadow:0 6px 16px -4px rgba(10,132,255,.55);
+  overflow:hidden;
 }
 .brand-name{ font-weight:800; font-size:17px; letter-spacing:.02em; }
 .icon-btn{
@@ -367,8 +368,8 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
   <!-- ===================== TOPBAR ===================== -->
   <header class="topbar" id="topbar">
     <div class="brand">
-      <div class="brand-mark">🐷</div>
-      <div class="brand-name">Pocket</div>
+      <div class="brand-mark"></div>
+      <div class="brand-name">Money Nest</div>
     </div>
     <div style="display:flex; gap:8px;">
       <button class="icon-btn" id="darkToggleBtn" title="ダークモード切替">🌙</button>
@@ -478,7 +479,7 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
 
 <script>
 /* ============================================================
-   Pocket ── お小遣い・貯金管理アプリ ロジック
+   Money Nest ── お小遣い・貯金管理アプリ ロジック
    すべてのデータは LocalStorage に保存されます（Cookie同意時のみ）
    ============================================================ */
 (function(){
@@ -1234,7 +1235,7 @@ function exportCSV(){
     rows.push([t.date, t.type==='expense'?'支出':'収入', catInfo(t.type,t.category).label, t.amount, (t.memo||"").replace(/[\r\n,]/g," ")]);
   });
   const csv = "\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  downloadFile(csv, `pocket_${todayStr()}.csv`, "text/csv;charset=utf-8;");
+  downloadFile(csv, `moneynest_${todayStr()}.csv`, "text/csv;charset=utf-8;");
   toast("CSVを出力しました", "success");
 }
 function downloadFile(content, filename, mime){
@@ -1293,7 +1294,7 @@ function renderSettingsPage(){
       </div>
     </div>
 
-    <div style="text-align:center; color:var(--text-faint); font-size:11.5px; padding:16px 0 6px;">Pocket ── お小遣い・貯金管理 v1.0</div>
+    <div style="text-align:center; color:var(--text-faint); font-size:11.5px; padding:16px 0 6px;">Money Nest ── お小遣い・貯金管理 v1.0</div>
   `;
 
   $("#saveSettingsBtn").addEventListener("click", ()=>{
@@ -1309,7 +1310,7 @@ function renderSettingsPage(){
 
   $("#exportJsonRow").addEventListener("click", ()=>{
     const dump = {settings, transactions:txs, history, meta};
-    downloadFile(JSON.stringify(dump, null, 2), `pocket_backup_${todayStr()}.json`, "application/json");
+    downloadFile(JSON.stringify(dump, null, 2), `moneynest_backup_${todayStr()}.json`, "application/json");
     toast("データをエクスポートしました", "success");
   });
   $("#exportCsvRow").addEventListener("click", exportCSV);
