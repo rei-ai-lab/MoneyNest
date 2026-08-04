@@ -1,12 +1,13 @@
-// Pocket ── Service Worker
+// Money Nest ── Service Worker
 // アプリの基本ファイルをキャッシュし、オフラインでも起動できるようにします。
  
-const CACHE_NAME = "pocket-cache-v1";
+const CACHE_NAME = "money-nest-cache-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon.svg"
+  "./icon-192.png",
+  "./icon-512.png"
 ];
  
 self.addEventListener("install", (event) => {
@@ -43,4 +44,3 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
- 
