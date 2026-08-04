@@ -1,0 +1,16 @@
+{
+  "name": "Pocket ── おこづかい貯金管理",
+  "short_name": "Pocket",
+  "description": "3秒で記録できる、シンプルなお小遣い・貯金管理アプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F7FB",
+  "theme_color": "#0A84FF",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
