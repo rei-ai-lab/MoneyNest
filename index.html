@@ -116,11 +116,10 @@ button{ font-family:inherit; }
 .brand{ display:flex; align-items:center; gap:9px; }
 .brand-mark{
   width:34px; height:34px; border-radius:11px;
-  background:linear-gradient(150deg, var(--accent), #6BC7FF) url('icon-192.png') center/78% no-repeat;
-  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; flex:0 0 auto;
   box-shadow:0 6px 16px -4px rgba(10,132,255,.55);
-  overflow:hidden;
 }
+.brand-mark img{ width:100%; height:100%; object-fit:cover; display:block; }
 .brand-name{ font-weight:800; font-size:17px; letter-spacing:.02em; }
 .icon-btn{
   width:38px; height:38px; border-radius:50%; border:none; cursor:pointer;
@@ -368,7 +367,7 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
   <!-- ===================== TOPBAR ===================== -->
   <header class="topbar" id="topbar">
     <div class="brand">
-      <div class="brand-mark"></div>
+      <div class="brand-mark"><img src="icon-192.png" alt="Money Nest"></div>
       <div class="brand-name">Money Nest</div>
     </div>
     <div style="display:flex; gap:8px;">
