@@ -1,6 +1,6 @@
 {
-  "name": "Pocket ── おこづかい貯金管理",
-  "short_name": "Pocket",
+  "name": "Money Nest ── 毎日のお小遣い管理をもっと簡単に",
+  "short_name": "Money Nest",
   "description": "3秒で記録できる、シンプルなお小遣い・貯金管理アプリ",
   "start_url": "./index.html",
   "scope": "./",
