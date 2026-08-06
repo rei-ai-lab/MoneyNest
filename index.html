@@ -324,6 +324,10 @@ html.dark .sim-box{ color:var(--accent-2); }
 @keyframes popIn{ from{transform:scale(.92); opacity:0;} to{transform:scale(1); opacity:1;} }
 .sheet-handle{ width:38px; height:5px; background:var(--divider); border-radius:99px; margin:8px auto 14px; }
 .sheet-title{ font-size:18px; font-weight:800; margin-bottom:18px; text-align:center; }
+.wizard-dots{ display:flex; justify-content:center; gap:6px; margin:-8px 0 18px; }
+.wizard-dots .dot{ width:7px; height:7px; border-radius:99px; background:var(--divider); transition:.25s; }
+.wizard-dots .dot.active{ background:var(--accent); width:20px; }
+.wizard-dots .dot.done{ background:var(--accent-2); }
 .sheet-title-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; position:relative; }
 .sheet-title-row .sheet-title{ flex:1; text-align:center; }
 .sheet-title-row .icon-btn{ position:absolute; right:20px; }
@@ -422,15 +426,20 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
   </div>
 </div>
 
-<!-- ===================== ONBOARDING MODAL ===================== -->
+<!-- ===================== ONBOARDING MODAL (ウィザード形式) ===================== -->
 <div class="overlay center hidden" id="onboardModal">
   <div class="sheet" style="border-radius:26px;">
     <div style="text-align:center; margin-bottom:6px;">
-      <div style="font-size:44px;">🐷</div>
+      <div style="font-size:40px;" id="onboardEmoji">🐷</div>
     </div>
-    <div class="sheet-title">はじめまして！<br><span style="font-size:14px; font-weight:600; color:var(--text-sub);">かんたん初期設定をしましょう</span></div>
+    <div class="sheet-title" id="onboardStepTitle">はじめまして！<br><span style="font-size:14px; font-weight:600; color:var(--text-sub);">かんたん初期設定をしましょう</span></div>
+    <div class="wizard-dots" id="onboardDots"></div>
     <div id="onboardForm"></div>
-    <button class="btn btn-primary" id="onboardSubmit" style="margin-top:6px;">はじめる</button>
+    <div id="onboardConfirmMsg" class="sim-box hidden" style="margin-bottom:14px;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-secondary hidden" id="onboardBackBtn" style="flex:0 0 auto; width:auto; padding:15px 20px;">戻る</button>
+      <button class="btn btn-primary" id="onboardNextBtn" style="margin-top:0;">つぎへ</button>
+    </div>
   </div>
 </div>
 
@@ -507,6 +516,23 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
   </div>
 </div>
 
+<!-- ===================== CONTACT MODAL ===================== -->
+<div class="overlay hidden" id="contactModal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <div class="sheet-title" style="margin-bottom:0;">お問い合わせ・ご意見</div>
+      <button class="icon-btn" id="contactModalCloseBtn" aria-label="閉じる">✕</button>
+    </div>
+    <div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin:-6px 0 18px;">
+      ご意見・ご要望・不具合報告など、お気軽にお送りください。<br>送信するとお使いのメールアプリが開きます。
+    </div>
+    <div class="field"><label>お名前（任意）</label><input id="contact_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
+    <div class="field"><label>お問い合わせ内容</label><textarea id="contact_message" rows="5" placeholder="ここに内容を入力してください" maxlength="1000"></textarea></div>
+    <button class="btn btn-primary" id="contactSendBtn">メールで送信する</button>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    Money Nest ── お小遣い・貯金管理アプリ ロジック
@@ -547,22 +573,27 @@ const DOW = ["日","月","火","水","木","金","土"];
 
 // サイトの更新情報（新しい順）。設定画面の「更新情報」に表示されます。
 const CHANGELOG = [
-  { version:"1.4", date:"2026-08-04", notes:[
-    "設定画面に更新情報を表示するようにしました",
-  ]},
-  { version:"1.3", date:"2026-08-04", notes:[
-    "設定画面からCookieの許可・拒否をあとから変更できるようにしました",
-    "記録モーダルに閉じる（✕）ボタンを追加しました",
-  ]},
-  { version:"1.2", date:"2026-08-04", notes:[
-    "レシート画像をAIが読み取り、金額・カテゴリ・日付を自動入力する機能を追加しました",
-  ]},
-  { version:"1.1", date:"2026-08-04", notes:[
-    "アプリ名を「Money Nest」に変更しました",
-    "アプリアイコンを新しいデザインに変更しました",
-  ]},
   { version:"1.0", date:"2026-08-04", notes:[
-    "初回リリース：支出・収入の記録、カレンダー、グラフ・統計、貯金目標、月次リセット、ダークモードなどの基本機能を実装しました",
+    "支出・収入の記録機能（金額・カテゴリ・メモ・日付を3秒で入力）",
+    "ホーム画面に残高・今月の支出・貯金目標の進捗をガラス風カードで表示",
+    "検索・カテゴリ絞り込みに対応した履歴一覧",
+    "カレンダー表示（記録がある日をマーク、日別詳細を確認可能）",
+    "カテゴリ別・日別・月別のグラフと収支比較グラフ（Chart.js）",
+    "総支出・平均支出・最大/最小支出などの統計表示",
+    "貯金目標の進捗バーとシミュレーション（達成予測メッセージ）",
+    "目標達成時のお祝いアニメーション（紙吹雪）",
+    "月が変わったときの自動リセット確認と月次履歴の保存",
+    "残高が20%・10%・0%以下になったときの通知",
+    "ダークモード対応",
+    "レシート画像をAIが読み取り、金額・カテゴリ・日付を自動入力する機能",
+    "設定画面からCookieの許可・拒否をあとから変更できる機能",
+    "データのエクスポート／インポート、CSV出力、全データ削除機能",
+    "PWA対応（ホーム画面への追加・オフライン起動）",
+    "アプリ名を「Money Nest」に設定し、専用アイコンを適用",
+    "毎月の貯金目標機能を追加（今月の貯金額と目標を比較して達成率を表示）",
+    "毎月のお小遣い自動入金機能を追加（設定した日に自動で収入登録・重複防止つき）",
+    "設定画面から「アプリを最新の状態に更新」できるボタンを追加",
+    "設定画面に「お問い合わせ・ご意見はこちら」を追加",
   ]},
 ];
 
@@ -626,54 +657,180 @@ function bootNoStorage(){
   txs = []; history = []; meta = defaultMeta();
   renderAll();
   $("#onboardModal").classList.remove("hidden");
-  buildOnboardForm();
+  startOnboardWizard();
 }
 
 /* ================= 初期データ ================= */
-function defaultSettings(){ return {name:"", monthlyAllowance:0, goalAmount:0, goalName:"", darkMode:false}; }
-function defaultMeta(){ return {currentMonth: thisMonthKey(), totalSavings:0, notified:{"20":false,"10":false,"0":false,"goal":false}}; }
+function defaultSettings(){
+  return {
+    name:"", monthlyAllowance:0, goalAmount:0, goalName:"", darkMode:false,
+    // 毎月の貯金目標
+    monthlyGoalEnabled:false, monthlyGoalAmount:0,
+    // 毎月のお小遣い自動入金
+    autoAllowanceEnabled:false, autoAllowanceAmount:0, autoAllowanceDay:1,
+  };
+}
+function defaultMeta(){ return {currentMonth: thisMonthKey(), totalSavings:0, notified:{"20":false,"10":false,"0":false,"goal":false}, lastAutoAllowanceMonth:null}; }
 
 function boot(){
-  settings = load(KEYS.settings, null);
+  const loadedSettings = load(KEYS.settings, null);
+  // 既存ユーザーの設定にも新機能の項目が確実に存在するようにマージ
+  settings = loadedSettings ? {...defaultSettings(), ...loadedSettings} : null;
   txs = load(KEYS.tx, []);
   history = load(KEYS.history, []);
-  meta = load(KEYS.meta, defaultMeta());
+  meta = {...defaultMeta(), ...load(KEYS.meta, {})};
 
   applyDarkMode();
 
   if(!settings){
     settings = defaultSettings();
     $("#onboardModal").classList.remove("hidden");
-    buildOnboardForm();
+    startOnboardWizard();
   } else {
     checkMonthRollover();
+    checkAutoAllowance();
   }
   renderAll();
 }
 
-/* ================= 初期設定フォーム ================= */
-function buildOnboardForm(){
-  $("#onboardForm").innerHTML = `
-    <div class="field"><label>あなたの名前</label><input id="ob_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
-    <div class="field"><label>今月のお小遣い金額</label><input id="ob_allowance" type="number" inputmode="numeric" placeholder="例：5000" min="0"></div>
-    <div class="field"><label>貯金の目標金額</label><input id="ob_goalAmount" type="number" inputmode="numeric" placeholder="例：20000" min="0"></div>
-    <div class="field"><label>目標名</label><input id="ob_goalName" type="text" placeholder="例：Switch 2・旅行・イヤホンなど" maxlength="24"></div>
-  `;
+/* ================= 初期設定ウィザード ================= */
+const ONBOARD_STEPS = ["profile", "autoAllowance", "monthlyGoal"];
+let onboardStepIdx = 0;
+// ウィザード内で入力中の値を一時保持
+let onboardDraft = {};
+
+function startOnboardWizard(){
+  onboardStepIdx = 0;
+  onboardDraft = {
+    name:"", monthlyAllowance:0, goalAmount:0, goalName:"",
+    autoAllowanceEnabled:false, autoAllowanceAmount:0, autoAllowanceDay:1,
+    monthlyGoalEnabled:false, monthlyGoalAmount:0,
+  };
+  renderOnboardStep();
 }
-$("#onboardSubmit").addEventListener("click", ()=>{
-  const name = $("#ob_name").value.trim() || "あなた";
-  const allowance = Math.max(0, Number($("#ob_allowance").value)||0);
-  const goalAmount = Math.max(0, Number($("#ob_goalAmount").value)||0);
-  const goalName = $("#ob_goalName").value.trim() || "貯金目標";
-  settings = {name, monthlyAllowance:allowance, goalAmount, goalName, darkMode:false};
+function renderOnboardDots(){
+  $("#onboardDots").innerHTML = ONBOARD_STEPS.map((_,i)=>
+    `<span class="dot ${i===onboardStepIdx?'active':(i<onboardStepIdx?'done':'')}"></span>`
+  ).join("");
+}
+function renderOnboardStep(){
+  renderOnboardDots();
+  $("#onboardConfirmMsg").classList.add("hidden");
+  $("#onboardBackBtn").classList.toggle("hidden", onboardStepIdx===0);
+  const step = ONBOARD_STEPS[onboardStepIdx];
+  const isLast = onboardStepIdx === ONBOARD_STEPS.length-1;
+  $("#onboardNextBtn").textContent = isLast ? "はじめる" : "つぎへ";
+
+  if(step === "profile"){
+    $("#onboardEmoji").textContent = "🐷";
+    $("#onboardStepTitle").innerHTML = `はじめまして！<br><span style="font-size:14px; font-weight:600; color:var(--text-sub);">かんたん初期設定をしましょう</span>`;
+    $("#onboardForm").innerHTML = `
+      <div class="field"><label>あなたの名前</label><input id="ob_name" type="text" placeholder="例：はなこ" maxlength="20" value="${escapeHtml(onboardDraft.name)}"></div>
+      <div class="field"><label>今月のお小遣い金額</label><input id="ob_allowance" type="number" inputmode="numeric" placeholder="例：5000" min="0" value="${onboardDraft.monthlyAllowance||''}"></div>
+      <div class="field"><label>貯金の目標金額</label><input id="ob_goalAmount" type="number" inputmode="numeric" placeholder="例：20000" min="0" value="${onboardDraft.goalAmount||''}"></div>
+      <div class="field"><label>目標名</label><input id="ob_goalName" type="text" placeholder="例：Switch 2・旅行・イヤホンなど" maxlength="24" value="${escapeHtml(onboardDraft.goalName)}"></div>
+    `;
+  } else if(step === "autoAllowance"){
+    $("#onboardEmoji").textContent = "💴";
+    $("#onboardStepTitle").innerHTML = `毎月のお小遣い<br><span style="font-size:14px; font-weight:600; color:var(--text-sub);">自動入金を設定しましょう</span>`;
+    const dayOptions = Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}" ${onboardDraft.autoAllowanceDay===d?'selected':''}>${d}日</option>`).join("");
+    $("#onboardForm").innerHTML = `
+      <div class="glass glass-sm settings-row" style="padding:14px 16px; margin-bottom:16px;">
+        <div><div class="label">自動入金を利用する</div><div class="desc">設定した日に毎月自動でお小遣いを記録します</div></div>
+        <label class="switch"><input type="checkbox" id="ob_autoEnabled" ${onboardDraft.autoAllowanceEnabled?'checked':''}><span class="track"></span></label>
+      </div>
+      <div class="field"><label>毎月のお小遣い金額</label><input id="ob_autoAmount" type="number" inputmode="numeric" placeholder="例：3000" min="0" value="${onboardDraft.autoAllowanceAmount||''}"></div>
+      <div class="field"><label>受け取る日（毎月）</label><select id="ob_autoDay">${dayOptions}</select></div>
+    `;
+  } else if(step === "monthlyGoal"){
+    $("#onboardEmoji").textContent = "🎯";
+    $("#onboardStepTitle").innerHTML = `毎月の貯金目標<br><span style="font-size:14px; font-weight:600; color:var(--text-sub);">目標金額を設定しましょう</span>`;
+    $("#onboardForm").innerHTML = `
+      <div class="glass glass-sm settings-row" style="padding:14px 16px; margin-bottom:16px;">
+        <div><div class="label">毎月の貯金目標を利用する</div><div class="desc">毎月いくら貯金するか目標を決めて管理します</div></div>
+        <label class="switch"><input type="checkbox" id="ob_goalEnabled" ${onboardDraft.monthlyGoalEnabled?'checked':''}><span class="track"></span></label>
+      </div>
+      <div class="field"><label>毎月の貯金目標金額</label><input id="ob_monthlyGoalAmount" type="number" inputmode="numeric" placeholder="例：2000" min="0" value="${onboardDraft.monthlyGoalAmount||''}"></div>
+    `;
+  }
+}
+function collectOnboardStep(){
+  const step = ONBOARD_STEPS[onboardStepIdx];
+  if(step === "profile"){
+    onboardDraft.name = $("#ob_name").value.trim();
+    onboardDraft.monthlyAllowance = Math.max(0, Number($("#ob_allowance").value)||0);
+    onboardDraft.goalAmount = Math.max(0, Number($("#ob_goalAmount").value)||0);
+    onboardDraft.goalName = $("#ob_goalName").value.trim();
+  } else if(step === "autoAllowance"){
+    onboardDraft.autoAllowanceEnabled = $("#ob_autoEnabled").checked;
+    onboardDraft.autoAllowanceAmount = Math.max(0, Number($("#ob_autoAmount").value)||0);
+    onboardDraft.autoAllowanceDay = Number($("#ob_autoDay").value)||1;
+  } else if(step === "monthlyGoal"){
+    onboardDraft.monthlyGoalEnabled = $("#ob_goalEnabled").checked;
+    onboardDraft.monthlyGoalAmount = Math.max(0, Number($("#ob_monthlyGoalAmount").value)||0);
+  }
+}
+$("#onboardBackBtn").addEventListener("click", ()=>{
+  collectOnboardStep();
+  onboardStepIdx = Math.max(0, onboardStepIdx-1);
+  renderOnboardStep();
+});
+$("#onboardNextBtn").addEventListener("click", ()=>{
+  collectOnboardStep();
+  const step = ONBOARD_STEPS[onboardStepIdx];
+  const isLast = onboardStepIdx === ONBOARD_STEPS.length-1;
+
+  // 各ステップの完了メッセージを一瞬表示してから次へ
+  let msg = "";
+  if(step === "autoAllowance"){
+    msg = onboardDraft.autoAllowanceEnabled
+      ? `毎月${onboardDraft.autoAllowanceDay}日に${yen(onboardDraft.autoAllowanceAmount)}円がお小遣いとして自動登録されます。`
+      : "自動入金は利用しません。";
+  } else if(step === "monthlyGoal"){
+    msg = onboardDraft.monthlyGoalEnabled
+      ? `毎月${yen(onboardDraft.monthlyGoalAmount)}円を目標に貯金します。`
+      : "毎月の貯金目標は利用しません。";
+  }
+
+  if(!isLast){
+    if(msg){
+      $("#onboardConfirmMsg").textContent = "✅ " + msg;
+      $("#onboardConfirmMsg").classList.remove("hidden");
+      setTimeout(()=>{ onboardStepIdx++; renderOnboardStep(); }, 700);
+    } else {
+      onboardStepIdx++; renderOnboardStep();
+    }
+    return;
+  }
+
+  // 最終ステップ：すべて保存してアプリを開始
+  if(msg){
+    $("#onboardConfirmMsg").textContent = "✅ " + msg;
+    $("#onboardConfirmMsg").classList.remove("hidden");
+  }
+  settings = {
+    name: onboardDraft.name || "あなた",
+    monthlyAllowance: onboardDraft.monthlyAllowance,
+    goalAmount: onboardDraft.goalAmount,
+    goalName: onboardDraft.goalName || "貯金目標",
+    darkMode:false,
+    monthlyGoalEnabled: onboardDraft.monthlyGoalEnabled,
+    monthlyGoalAmount: onboardDraft.monthlyGoalAmount,
+    autoAllowanceEnabled: onboardDraft.autoAllowanceEnabled,
+    autoAllowanceAmount: onboardDraft.autoAllowanceAmount,
+    autoAllowanceDay: onboardDraft.autoAllowanceDay,
+  };
   meta = defaultMeta();
   save(KEYS.settings, settings);
   save(KEYS.meta, meta);
   save(KEYS.tx, txs);
   save(KEYS.history, history);
-  $("#onboardModal").classList.add("hidden");
-  toast("設定を保存しました！", "success");
-  renderAll();
+  setTimeout(()=>{
+    $("#onboardModal").classList.add("hidden");
+    toast("設定を保存しました！", "success");
+    checkAutoAllowance();
+    renderAll();
+  }, msg ? 700 : 0);
 });
 
 /* ================= 月替わり検知・リセット ================= */
@@ -691,6 +848,7 @@ $("#rolloverConfirm").addEventListener("click", ()=>{
   save(KEYS.meta, meta);
   $("#rolloverModal").classList.add("hidden");
   toast("今月分をリセットしました", "success");
+  checkAutoAllowance();
   renderAll();
 });
 function archiveMonth(mKey){
@@ -703,6 +861,31 @@ function archiveMonth(mKey){
   history.unshift({month:mKey, totalExpense, totalIncome, saved, goalAchieved: achievedGoal ? settings.goalName : null});
   save(KEYS.history, history);
   save(KEYS.meta, meta);
+}
+
+/* ================= 毎月のお小遣い自動入金 ================= */
+// 設定した受取日を過ぎていて、今月まだ実行していなければ自動で収入を1件登録する。
+// 何度アプリを起動しても、同じ月には1回しか実行されない。
+function checkAutoAllowance(){
+  if(!settings.autoAllowanceEnabled) return;
+  if(!settings.autoAllowanceAmount || settings.autoAllowanceAmount<=0) return;
+  if(meta.lastAutoAllowanceMonth === thisMonthKey()) return;
+
+  const now = new Date();
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const targetDay = Math.min(Math.max(1, settings.autoAllowanceDay||1), lastDayOfMonth);
+  if(now.getDate() < targetDay) return; // まだ受取日になっていない
+
+  const dateStr = `${thisMonthKey()}-${String(targetDay).padStart(2,'0')}`;
+  txs.push({
+    id:uid(), type:'income', amount:Math.round(settings.autoAllowanceAmount),
+    category:'allowance', memo:'毎月のお小遣い', date:dateStr,
+    createdAt:Date.now().toString(), auto:true
+  });
+  save(KEYS.tx, txs);
+  meta.lastAutoAllowanceMonth = thisMonthKey();
+  save(KEYS.meta, meta);
+  toast(`毎月のお小遣い ${yen(settings.autoAllowanceAmount)}円 を自動入金しました🎉`, "success");
 }
 
 /* ================= ダークモード ================= */
@@ -820,6 +1003,19 @@ function renderHome(){
     simText = `このままだと目標まであと${yen(shortfall)}円足りなさそうです。使う金額を見直してみましょう。`;
   }
 
+  // ---- 毎月の貯金目標（今月の貯金額 vs 目標金額） ----
+  const monthlyGoalOn = !!settings.monthlyGoalEnabled;
+  const monthlyGoalAmount = settings.monthlyGoalAmount || 0;
+  const monthlySaved = Math.max(0, currentBalance()); // 今月の貯金額（今月分の残高）
+  const monthlyPct = monthlyGoalAmount>0 ? Math.min(100, Math.round(monthlySaved/monthlyGoalAmount*100)) : 0;
+  const monthlyRemain = Math.max(0, monthlyGoalAmount - monthlySaved);
+  const monthlyAchieved = monthlyGoalAmount>0 && monthlySaved >= monthlyGoalAmount;
+  const monthlyMsg = monthlyGoalAmount<=0
+    ? "設定画面から毎月の貯金目標を登録してみましょう。"
+    : monthlyAchieved
+      ? "🎉 目標達成おめでとうございます！"
+      : `あと${yen(monthlyRemain)}円で目標達成です！`;
+
   $("#page-home").innerHTML = `
     <div class="glass hero-card">
       <div class="hero-greet">こんにちは 👋</div>
@@ -849,6 +1045,24 @@ function renderHome(){
       </div>
     </div>
 
+    ${monthlyGoalOn ? `
+    <div class="glass goal-card">
+      <div class="goal-top">
+        <div>
+          <div class="goal-title">今月の貯金目標</div>
+          <div class="goal-name">💰 月${yen(monthlyGoalAmount)}円</div>
+        </div>
+        <div class="goal-pct num">${monthlyPct}%</div>
+      </div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" id="monthlyGoalBarFill"></div></div>
+      <div class="goal-foot">
+        <span>現在の貯金額 ${yen(monthlySaved)}円</span>
+        <span>目標 ${yen(monthlyGoalAmount)}円</span>
+      </div>
+      <div class="sim-box">${monthlyAchieved ? '🎉' : '💡'} ${monthlyMsg}</div>
+    </div>
+    ` : ``}
+
     <div class="glass goal-card">
       <div class="goal-top">
         <div>
@@ -871,7 +1085,11 @@ function renderHome(){
     </div>
     <div id="homeRecentList"></div>
   `;
-  requestAnimationFrame(()=>{ $("#goalBarFill").style.width = pct+"%"; });
+  requestAnimationFrame(()=>{
+    $("#goalBarFill").style.width = pct+"%";
+    const monthlyBar = $("#monthlyGoalBarFill");
+    if(monthlyBar) monthlyBar.style.width = monthlyPct+"%";
+  });
 
   const recent = [...txs].sort((a,b)=> (b.date+b.createdAt).localeCompare(a.date+a.createdAt)).slice(0,5);
   $("#homeRecentList").innerHTML = recent.length ? recent.map(renderTxItem).join("") : emptyState("🐷","まだ記録がありません","右下の「＋」から記録してみましょう");
@@ -1429,6 +1647,43 @@ function renderSettingsPage(){
     </div>
 
     <div class="settings-group">
+      <div class="gt">毎月のお小遣い設定</div>
+      <div class="glass glass-sm">
+        <div class="settings-row">
+          <div>
+            <div class="label">自動入金を利用する</div>
+            <div class="desc">設定した日に毎月自動でお小遣いを記録します</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="set_autoEnabled" ${settings.autoAllowanceEnabled?'checked':''}><span class="track"></span></label>
+        </div>
+        <div class="settings-row" style="display:block;">
+          <div class="field" style="margin-bottom:14px;"><label>毎月のお小遣い金額</label><input id="set_autoAmount" type="number" min="0" value="${settings.autoAllowanceAmount}"></div>
+          <div class="field" style="margin-bottom:6px;"><label>受け取る日（毎月）</label>
+            <select id="set_autoDay">${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}" ${settings.autoAllowanceDay===d?'selected':''}>${d}日</option>`).join("")}</select>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="saveAutoAllowanceBtn" style="margin-top:12px;">更新</button>
+    </div>
+
+    <div class="settings-group">
+      <div class="gt">毎月の貯金目標設定</div>
+      <div class="glass glass-sm">
+        <div class="settings-row">
+          <div>
+            <div class="label">毎月の貯金目標を利用する</div>
+            <div class="desc">ホーム画面に今月の貯金目標カードを表示します</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="set_monthlyGoalEnabled" ${settings.monthlyGoalEnabled?'checked':''}><span class="track"></span></label>
+        </div>
+        <div class="settings-row" style="display:block;">
+          <div class="field" style="margin-bottom:6px;"><label>毎月の貯金目標金額</label><input id="set_monthlyGoalAmount" type="number" min="0" value="${settings.monthlyGoalAmount}"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="saveMonthlyGoalBtn" style="margin-top:12px;">更新</button>
+    </div>
+
+    <div class="settings-group">
       <div class="gt">表示</div>
       <div class="glass glass-sm">
         <div class="settings-row">
@@ -1474,6 +1729,23 @@ function renderSettingsPage(){
           </div>
           <span>›</span>
         </div>
+        <div class="settings-row link" id="appRefreshRow">
+          <div>
+            <div class="label">アプリを最新の状態に更新</div>
+            <div class="desc">アプリ本体だけを更新します（家計データは消えません）</div>
+          </div>
+          <span id="appRefreshIcon">🔄</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="gt">サポート</div>
+      <div class="glass glass-sm">
+        <div class="settings-row link" id="contactRow">
+          <div class="label">お問い合わせ・ご意見はこちら</div>
+          <span>›</span>
+        </div>
       </div>
     </div>
 
@@ -1496,6 +1768,33 @@ function renderSettingsPage(){
     toast("設定を保存しました", "success");
     renderHome();
   });
+
+  $("#saveAutoAllowanceBtn").addEventListener("click", ()=>{
+    settings.autoAllowanceEnabled = $("#set_autoEnabled").checked;
+    settings.autoAllowanceAmount = Math.max(0, Number($("#set_autoAmount").value)||0);
+    settings.autoAllowanceDay = Number($("#set_autoDay").value)||1;
+    save(KEYS.settings, settings);
+    if(settings.autoAllowanceEnabled && settings.autoAllowanceAmount>0){
+      toast(`毎月${settings.autoAllowanceDay}日に${yen(settings.autoAllowanceAmount)}円がお小遣いとして自動登録されます。`, "success");
+    } else {
+      toast("自動入金をOFFにしました", "info");
+    }
+    checkAutoAllowance();
+    renderHome();
+  });
+
+  $("#saveMonthlyGoalBtn").addEventListener("click", ()=>{
+    settings.monthlyGoalEnabled = $("#set_monthlyGoalEnabled").checked;
+    settings.monthlyGoalAmount = Math.max(0, Number($("#set_monthlyGoalAmount").value)||0);
+    save(KEYS.settings, settings);
+    if(settings.monthlyGoalEnabled && settings.monthlyGoalAmount>0){
+      toast(`毎月${yen(settings.monthlyGoalAmount)}円を目標に貯金します。`, "success");
+    } else {
+      toast("毎月の貯金目標をOFFにしました", "info");
+    }
+    renderHome();
+  });
+
   $("#set_dark").addEventListener("change", (e)=>{ settings.darkMode = e.target.checked; applyDarkMode(); save(KEYS.settings, settings); if(currentTab==='charts') renderChartsPage(); });
 
   $("#set_cookie").addEventListener("change", (e)=>{
@@ -1544,6 +1843,22 @@ function renderSettingsPage(){
     reader.readAsText(file);
   });
   $("#updateInfoRow").addEventListener("click", openUpdateModal);
+  $("#contactRow").addEventListener("click", openContactModal);
+  $("#appRefreshRow").addEventListener("click", async ()=>{
+    $("#appRefreshIcon").textContent = "⏳";
+    toast("最新の状態を確認しています…", "info", 1600);
+    try{
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(reg => reg.update().catch(()=>{})));
+      }
+      if(window.caches && caches.keys){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } catch(e){ console.error("更新確認エラー", e); }
+    setTimeout(()=> location.reload(), 500);
+  });
   $("#deleteAllRow").addEventListener("click", ()=>{
     if(confirm("すべてのデータを削除します。この操作は取り消せません。よろしいですか？")){
       Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
@@ -1567,6 +1882,27 @@ function openUpdateModal(){
 }
 $("#updateModalCloseBtn").addEventListener("click", ()=> $("#updateModal").classList.add("hidden"));
 $("#updateModal").addEventListener("click", (e)=>{ if(e.target.id==="updateModal") $("#updateModal").classList.add("hidden"); });
+
+/* ---------- お問い合わせモーダル ---------- */
+// お問い合わせ送信先メールアドレス
+const CONTACT_EMAIL = "rei.ai.lab.official@gmail.com";
+function openContactModal(){
+  $("#contact_name").value = "";
+  $("#contact_message").value = "";
+  $("#contactModal").classList.remove("hidden");
+}
+$("#contactModalCloseBtn").addEventListener("click", ()=> $("#contactModal").classList.add("hidden"));
+$("#contactModal").addEventListener("click", (e)=>{ if(e.target.id==="contactModal") $("#contactModal").classList.add("hidden"); });
+$("#contactSendBtn").addEventListener("click", ()=>{
+  const name = $("#contact_name").value.trim();
+  const message = $("#contact_message").value.trim();
+  if(!message){ toast("お問い合わせ内容を入力してください", "warn"); return; }
+  const subject = encodeURIComponent("【Money Nest】お問い合わせ・ご意見");
+  const body = encodeURIComponent(`お名前：${name || "匿名"}\n\n${message}`);
+  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+  toast("メールアプリを起動しました", "success");
+  $("#contactModal").classList.add("hidden");
+});
 
 /* ================= 全体描画 ================= */
 function renderAll(){
