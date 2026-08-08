@@ -245,11 +245,21 @@ html.dark .sim-box{ color:var(--accent-2); }
 .update-notes{ margin:8px 0 0; padding-left:18px; }
 .update-notes li{ font-size:12.5px; color:var(--text-sub); line-height:1.6; }
 .update-notes li + li{ margin-top:2px; }
+.faq-empty{ text-align:center; padding:16px 10px 8px; }
+.faq-empty-title{ font-size:16px; font-weight:800; margin-top:8px; }
+.faq-empty-sub{ font-size:12.5px; color:var(--text-sub); margin-top:8px; line-height:1.7; }
 .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:15px 16px; }
 .settings-row + .settings-row{ border-top:1px solid var(--divider); }
 .settings-row .label{ font-size:14.5px; font-weight:600; }
 .settings-row .desc{ font-size:11.5px; color:var(--text-sub); margin-top:2px; }
 .settings-row.link{ cursor:pointer; }
+.contact-option{ display:flex; align-items:center; gap:14px; padding:16px; margin-bottom:10px; cursor:pointer; transition:transform .12s; }
+.contact-option:active{ transform:scale(.98); }
+.contact-option .ico{ font-size:26px; flex:0 0 auto; width:44px; height:44px; border-radius:14px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; }
+.contact-option .mid{ flex:1; min-width:0; }
+.contact-option .mid .t{ font-size:14.5px; font-weight:800; }
+.contact-option .mid .d{ font-size:12px; color:var(--text-sub); margin-top:2px; }
+.contact-back{ display:flex; align-items:center; gap:5px; background:none; border:none; color:var(--accent); font-weight:700; font-size:13px; cursor:pointer; padding:0 0 14px; }
 .settings-row.danger .label{ color:var(--expense); }
 .field{ margin-bottom:16px; }
 .field label{ display:block; font-size:12.5px; font-weight:700; color:var(--text-sub); margin-bottom:7px; }
@@ -258,6 +268,7 @@ html.dark .sim-box{ color:var(--accent-2); }
   background:rgba(var(--surface),.5); color:var(--text-main); font-size:15px; outline:none;
   transition:border-color .15s; font-family:inherit;
 }
+.field textarea{ resize:vertical; min-height:70px; }
 .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--accent); }
 
 /* toggle switch */
@@ -516,20 +527,49 @@ html.dark .toast.success{ background:#0F2A1E; color:#5BE79B; }
   </div>
 </div>
 
+<!-- ===================== FAQ MODAL ===================== -->
+<div class="overlay hidden" id="faqModal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <div class="sheet-title" style="margin-bottom:0;">よくある質問</div>
+      <button class="icon-btn" id="faqModalCloseBtn" aria-label="閉じる">✕</button>
+    </div>
+    <div class="faq-empty">
+      <svg viewBox="0 0 220 200" width="180" height="164" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="110" cy="182" rx="70" ry="10" fill="var(--divider)"/>
+        <path d="M60 150 Q30 140 25 108 Q22 88 40 84 Q35 70 46 62 Q42 50 54 46 Q52 36 64 34" stroke="var(--text-faint)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="110" cy="120" rx="62" ry="50" fill="#FFFFFF" stroke="var(--accent)" stroke-width="3"/>
+        <circle cx="62" cy="76" r="20" fill="#FFFFFF" stroke="var(--accent)" stroke-width="3"/>
+        <circle cx="158" cy="76" r="20" fill="#FFFFFF" stroke="var(--accent)" stroke-width="3"/>
+        <circle cx="62" cy="76" r="9" fill="var(--accent-soft)"/>
+        <circle cx="158" cy="76" r="9" fill="var(--accent-soft)"/>
+        <circle cx="90" cy="112" r="6" fill="#0F1B2D"/>
+        <circle cx="130" cy="112" r="6" fill="#0F1B2D"/>
+        <circle cx="92" cy="110" r="2" fill="#FFFFFF"/>
+        <circle cx="132" cy="110" r="2" fill="#FFFFFF"/>
+        <ellipse cx="110" cy="130" rx="9" ry="6" fill="#FF9FB0"/>
+        <path d="M70 118 L45 112 M70 124 L43 124 M70 130 L45 136" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M150 118 L175 112 M150 124 L177 124 M150 130 L175 136" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M104 138 Q110 144 116 138" stroke="#0F1B2D" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="55" cy="150" r="3" fill="var(--accent-2)" opacity=".6"/>
+        <circle cx="168" cy="145" r="4" fill="var(--accent-2)" opacity=".5"/>
+      </svg>
+      <div class="faq-empty-title">🚧 現在作成中です</div>
+      <div class="faq-empty-sub">よくある質問ページはただいま準備しています。<br>もうしばらくお待ちください🙏</div>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== CONTACT MODAL ===================== -->
 <div class="overlay hidden" id="contactModal">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
-      <div class="sheet-title" style="margin-bottom:0;">お問い合わせ・ご意見</div>
+      <div class="sheet-title" id="contactModalTitle" style="margin-bottom:0;">お問い合わせ</div>
       <button class="icon-btn" id="contactModalCloseBtn" aria-label="閉じる">✕</button>
     </div>
-    <div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin:-6px 0 18px;">
-      ご意見・ご要望・不具合報告など、お気軽にお送りください。<br>送信するとお使いのメールアプリが開きます。
-    </div>
-    <div class="field"><label>お名前（任意）</label><input id="contact_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
-    <div class="field"><label>お問い合わせ内容</label><textarea id="contact_message" rows="5" placeholder="ここに内容を入力してください" maxlength="1000"></textarea></div>
-    <button class="btn btn-primary" id="contactSendBtn">メールで送信する</button>
+    <div id="contactModalBody"></div>
   </div>
 </div>
 
@@ -593,7 +633,8 @@ const CHANGELOG = [
     "毎月の貯金目標機能を追加（今月の貯金額と目標を比較して達成率を表示）",
     "毎月のお小遣い自動入金機能を追加（設定した日に自動で収入登録・重複防止つき）",
     "設定画面から「アプリを最新の状態に更新」できるボタンを追加",
-    "設定画面に「お問い合わせ・ご意見はこちら」を追加",
+    "お問い合わせ・機能追加リクエスト・不具合報告の3種類のフォームを追加（Googleスプレッドシートへ自動記録）",
+    "設定画面に「よくある質問」を追加（現在作成中）",
   ]},
 ];
 
@@ -1742,6 +1783,10 @@ function renderSettingsPage(){
     <div class="settings-group">
       <div class="gt">サポート</div>
       <div class="glass glass-sm">
+        <div class="settings-row link" id="faqRow">
+          <div class="label">よくある質問</div>
+          <span>›</span>
+        </div>
         <div class="settings-row link" id="contactRow">
           <div class="label">お問い合わせ・ご意見はこちら</div>
           <span>›</span>
@@ -1843,6 +1888,7 @@ function renderSettingsPage(){
     reader.readAsText(file);
   });
   $("#updateInfoRow").addEventListener("click", openUpdateModal);
+  $("#faqRow").addEventListener("click", openFaqModal);
   $("#contactRow").addEventListener("click", openContactModal);
   $("#appRefreshRow").addEventListener("click", async ()=>{
     $("#appRefreshIcon").textContent = "⏳";
@@ -1883,26 +1929,231 @@ function openUpdateModal(){
 $("#updateModalCloseBtn").addEventListener("click", ()=> $("#updateModal").classList.add("hidden"));
 $("#updateModal").addEventListener("click", (e)=>{ if(e.target.id==="updateModal") $("#updateModal").classList.add("hidden"); });
 
+/* ---------- よくある質問モーダル ---------- */
+function openFaqModal(){ $("#faqModal").classList.remove("hidden"); }
+$("#faqModalCloseBtn").addEventListener("click", ()=> $("#faqModal").classList.add("hidden"));
+$("#faqModal").addEventListener("click", (e)=>{ if(e.target.id==="faqModal") $("#faqModal").classList.add("hidden"); });
+
 /* ---------- お問い合わせモーダル ---------- */
-// お問い合わせ送信先メールアドレス
-const CONTACT_EMAIL = "rei.ai.lab.official@gmail.com";
+// Googleスプレッドシートへ送信するためのGoogle Apps Script（Webアプリ）のURL
+// 設定方法は同梱の SPREADSHEET_SETUP.md を参照してください
+const SHEET_ENDPOINT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+
+// スプレッドシートへ1件分のデータを送信する
+async function submitToSheet(payload){
+  if(!SHEET_ENDPOINT_URL || SHEET_ENDPOINT_URL.includes("YOUR_DEPLOYMENT_ID")){
+    toast("送信先が未設定です。SPREADSHEET_SETUP.mdをご確認ください", "danger", 5000);
+    return false;
+  }
+  try{
+    // Google Apps Script Webアプリはno-corsでの送信が基本パターン（応答は読めないが送信自体は行われる）
+    await fetch(SHEET_ENDPOINT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // シンプルリクエストにしてpreflightを回避
+      body: JSON.stringify(payload)
+    });
+    return true;
+  }catch(err){
+    console.error("スプレッドシートへの送信エラー", err);
+    return false;
+  }
+}
+
+let contactStep = "select"; // 'select' | 'inquiry' | 'feature' | 'bug'
+
+const CONTACT_TYPES = {
+  inquiry: { emoji:"📩", title:"お問い合わせフォーム", desc:"使い方やアプリについてのご質問はこちら" },
+  feature: { emoji:"💡", title:"機能追加リクエストフォーム", desc:"あったらいいなという機能を教えてください" },
+  bug:     { emoji:"🐞", title:"不具合報告フォーム", desc:"うまく動かないときはこちらからご報告ください" },
+};
+
 function openContactModal(){
-  $("#contact_name").value = "";
-  $("#contact_message").value = "";
+  contactStep = "select";
+  renderContactStep();
   $("#contactModal").classList.remove("hidden");
 }
+function backButtonHtml(){
+  return `<button class="contact-back" id="contactBackBtn">‹ 種類を選びなおす</button>`;
+}
+
+function renderContactStep(){
+  if(contactStep === "select"){
+    $("#contactModalTitle").textContent = "お問い合わせ";
+    $("#contactModalBody").innerHTML = `
+      <div style="font-size:13px; color:var(--text-sub); line-height:1.6; margin:-6px 0 16px;">
+        まず、内容に近いものを選んでください。
+      </div>
+      ${Object.entries(CONTACT_TYPES).map(([key,t])=>`
+        <div class="glass contact-option" data-type="${key}">
+          <div class="ico">${t.emoji}</div>
+          <div class="mid"><div class="t">${t.title}</div><div class="d">${t.desc}</div></div>
+          <span>›</span>
+        </div>
+      `).join("")}
+    `;
+    $$(".contact-option", $("#contactModalBody")).forEach(el=>{
+      el.addEventListener("click", ()=>{ contactStep = el.dataset.type; renderContactStep(); });
+    });
+    return;
+  }
+
+  const type = CONTACT_TYPES[contactStep];
+  $("#contactModalTitle").textContent = `${type.emoji} ${type.title}`;
+
+  if(contactStep === "inquiry"){
+    $("#contactModalBody").innerHTML = `
+      ${backButtonHtml()}
+      <div class="field"><label>お名前（任意）</label><input id="ct_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
+      <div class="field"><label>返信用メールアドレス（任意）</label><input id="ct_email" type="email" placeholder="例：hanako@example.com" maxlength="100"><div style="font-size:11px; color:var(--text-faint); margin-top:6px;">返信が必要な場合のみご記入ください</div></div>
+      <div class="field"><label>お問い合わせの種類</label>
+        <select id="ct_category">
+          <option>使い方について</option>
+          <option>アプリについて</option>
+          <option>ご意見・ご感想</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>お問い合わせ内容</label><textarea id="ct_message" rows="5" placeholder="内容を入力してください" maxlength="1000"></textarea></div>
+      <button class="btn btn-primary" id="contactSendBtn">送信する</button>
+    `;
+  } else if(contactStep === "feature"){
+    $("#contactModalBody").innerHTML = `
+      ${backButtonHtml()}
+      <div class="field"><label>お名前（任意）</label><input id="ct_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
+      <div class="field"><label>返信用メールアドレス（任意）</label><input id="ct_email" type="email" placeholder="例：hanako@example.com" maxlength="100"><div style="font-size:11px; color:var(--text-faint); margin-top:6px;">返信が必要な場合のみご記入ください</div></div>
+      <div class="field"><label>希望する機能名</label><input id="ct_featureName" type="text" placeholder="例：予算アラート機能" maxlength="60"></div>
+      <div class="field"><label>どの画面で使いたい機能ですか？</label>
+        <select id="ct_screen">
+          <option>ホーム画面</option>
+          <option>収入・支出入力</option>
+          <option>履歴</option>
+          <option>設定</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>その機能が必要な理由を教えてください</label><textarea id="ct_reason" rows="3" placeholder="例：今の使い方だとこう困っている、など" maxlength="500"></textarea></div>
+      <div class="field"><label>どのような動作を希望しますか？</label><textarea id="ct_behavior" rows="3" placeholder="例：こういうときにこう動いてほしい、など" maxlength="500"></textarea></div>
+      <div class="field"><label>その他ご要望（任意）</label><textarea id="ct_more" rows="2" placeholder="自由にご記入ください" maxlength="500"></textarea></div>
+      <button class="btn btn-primary" id="contactSendBtn">送信する</button>
+    `;
+  } else if(contactStep === "bug"){
+    $("#contactModalBody").innerHTML = `
+      ${backButtonHtml()}
+      <div class="field"><label>お名前（任意）</label><input id="ct_name" type="text" placeholder="例：はなこ" maxlength="20"></div>
+      <div class="field"><label>返信用メールアドレス（任意）</label><input id="ct_email" type="email" placeholder="例：hanako@example.com" maxlength="100"><div style="font-size:11px; color:var(--text-faint); margin-top:6px;">返信が必要な場合のみご記入ください</div></div>
+      <div class="field"><label>不具合が発生した画面</label>
+        <select id="ct_bugScreen">
+          <option>ホーム</option>
+          <option>収入入力</option>
+          <option>支出入力</option>
+          <option>履歴</option>
+          <option>設定</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>発生した不具合を教えてください</label><textarea id="ct_bugDesc" rows="3" placeholder="例：ボタンを押しても反応しない、など" maxlength="500"></textarea></div>
+      <div class="field"><label>不具合が発生する手順を教えてください</label><textarea id="ct_bugSteps" rows="3" placeholder="例：①＋ボタンを押す　②金額を入力する　③保存を押すと…" maxlength="500"></textarea></div>
+      <div class="field"><label>利用している端末</label>
+        <select id="ct_device">
+          <option>iPhone</option><option>Android</option><option>Windows</option><option>Mac</option><option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>利用ブラウザ</label>
+        <select id="ct_browser">
+          <option>Safari</option><option>Chrome</option><option>Edge</option><option>Firefox</option><option>その他</option>
+        </select>
+      </div>
+      <div class="field"><label>スクリーンショット添付（任意）</label>
+        <input id="ct_screenshot" type="file" accept="image/*">
+        <div style="font-size:11px; color:var(--text-faint); margin-top:6px;">※画像データそのものは送信されません（ファイル名のみ記録されます）</div>
+      </div>
+      <div class="field"><label>この不具合は現在も発生していますか？</label>
+        <select id="ct_stillHappens">
+          <option>はい</option><option>いいえ</option><option>わからない</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="contactSendBtn">送信する</button>
+    `;
+  }
+
+  $("#contactBackBtn").addEventListener("click", ()=>{ contactStep = "select"; renderContactStep(); });
+  $("#contactSendBtn").addEventListener("click", submitContactForm);
+}
+
+async function submitContactForm(){
+  const name = $("#ct_name").value.trim() || "匿名";
+  const email = $("#ct_email").value.trim();
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    toast("メールアドレスの形式が正しくありません", "warn"); return;
+  }
+  let type = "", answers = {};
+
+  if(contactStep === "inquiry"){
+    const category = $("#ct_category").value;
+    const message = $("#ct_message").value.trim();
+    if(!message){ toast("お問い合わせ内容を入力してください", "warn"); return; }
+    type = "お問い合わせ";
+    answers = { "お問い合わせの種類":category, "お問い合わせ内容":message };
+  } else if(contactStep === "feature"){
+    const featureName = $("#ct_featureName").value.trim();
+    const screen = $("#ct_screen").value;
+    const reason = $("#ct_reason").value.trim();
+    const behavior = $("#ct_behavior").value.trim();
+    const more = $("#ct_more").value.trim();
+    if(!featureName){ toast("希望する機能名を入力してください", "warn"); return; }
+    if(!reason){ toast("必要な理由を入力してください", "warn"); return; }
+    if(!behavior){ toast("希望する動作を入力してください", "warn"); return; }
+    type = "機能追加リクエスト";
+    answers = {
+      "希望する機能名":featureName, "使いたい画面":screen,
+      "必要な理由":reason, "希望する動作":behavior, "その他ご要望":more||"（なし）",
+    };
+  } else if(contactStep === "bug"){
+    const screen = $("#ct_bugScreen").value;
+    const desc = $("#ct_bugDesc").value.trim();
+    const steps = $("#ct_bugSteps").value.trim();
+    const device = $("#ct_device").value;
+    const browser = $("#ct_browser").value;
+    const screenshotFile = $("#ct_screenshot").files[0];
+    const stillHappens = $("#ct_stillHappens").value;
+    if(!desc){ toast("発生した不具合を入力してください", "warn"); return; }
+    if(!steps){ toast("発生する手順を入力してください", "warn"); return; }
+    type = "不具合報告";
+    answers = {
+      "発生した画面":screen, "発生した不具合":desc, "発生する手順":steps,
+      "利用端末":device, "利用ブラウザ":browser,
+      "現在も発生しているか":stillHappens,
+      "スクリーンショットファイル名": screenshotFile ? screenshotFile.name : "（なし）",
+    };
+  }
+
+  const payload = {
+    種別: type,
+    お名前: name,
+    返信用メールアドレス: email || "（返信不要）",
+    送信日時: new Date().toLocaleString('ja-JP'),
+    ...answers,
+  };
+
+  const btn = $("#contactSendBtn");
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.style.opacity = "0.6"; btn.textContent = "送信中…";
+
+  const ok = await submitToSheet(payload);
+
+  btn.disabled = false; btn.style.opacity = "1"; btn.textContent = originalLabel;
+
+  if(ok){
+    toast("送信しました。ありがとうございます！", "success");
+    $("#contactModal").classList.add("hidden");
+  } else if(SHEET_ENDPOINT_URL && !SHEET_ENDPOINT_URL.includes("YOUR_DEPLOYMENT_ID")){
+    toast("送信に失敗しました。通信環境をご確認のうえ、もう一度お試しください", "danger");
+  }
+}
+
 $("#contactModalCloseBtn").addEventListener("click", ()=> $("#contactModal").classList.add("hidden"));
 $("#contactModal").addEventListener("click", (e)=>{ if(e.target.id==="contactModal") $("#contactModal").classList.add("hidden"); });
-$("#contactSendBtn").addEventListener("click", ()=>{
-  const name = $("#contact_name").value.trim();
-  const message = $("#contact_message").value.trim();
-  if(!message){ toast("お問い合わせ内容を入力してください", "warn"); return; }
-  const subject = encodeURIComponent("【Money Nest】お問い合わせ・ご意見");
-  const body = encodeURIComponent(`お名前：${name || "匿名"}\n\n${message}`);
-  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-  toast("メールアプリを起動しました", "success");
-  $("#contactModal").classList.add("hidden");
-});
 
 /* ================= 全体描画 ================= */
 function renderAll(){
